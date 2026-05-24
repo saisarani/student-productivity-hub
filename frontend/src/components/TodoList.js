@@ -6,7 +6,6 @@ function TodoList() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState({ title: '', description: '', priority: 'medium' });
   const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState(null);
 
   // Fetch todos from API
   useEffect(() => {
@@ -126,42 +125,64 @@ function TodoList() {
             <div
               key={todo.id}
               className={`todo-item ${todo.completed ? 'completed' : ''}`}
-              style={{ borderLeftColor: getPriorityColor(todo.priority) }}
+              style={{ 
+                borderLeftColor: getPriorityColor(todo.priority), 
+                '--priority-color': getPriorityColor(todo.priority)
+              }}
             >
               <div className="todo-content">
                 <input
                   type="checkbox"
-                  checked={todo.completed}
+                  checked={!!todo.completed}
                   onChange={() => handleToggleComplete(todo)}
                   className="todo-checkbox"
+                  aria-label={todo.completed ? "Mark as incomplete" : "Mark as complete"}
                 />
                 <div className="todo-text">
                   <h3 className={todo.completed ? 'strikethrough' : ''}>{todo.title}</h3>
                   {todo.description && <p className="description">{todo.description}</p>}
-                  <span className="priority-badge" style={{ backgroundColor: getPriorityColor(todo.priority) }}>
+                  <span
+                    className="priority-badge"
+                    style={{ backgroundColor: getPriorityColor(todo.priority), '--priority-color': getPriorityColor(todo.priority) }}
+                  >
                     {todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}
                   </span>
                 </div>
               </div>
-
-              <button
-                className="btn-delete"
-                onClick={() => handleDeleteTodo(todo.id)}
-                title="Delete task"
-              >
-                🗑️
-              </button>
+              {/* Card actions: Delete, (optional: Edit) */}
+              <div className="cards-actions">
+                <button
+                  className="btn-delete"
+                  onClick={() => handleDeleteTodo(todo.id)}
+                  title="Delete task"
+                  aria-label="Delete task"
+                >
+                  🗑️
+                </button>
+                {/* Edit button example: Uncomment to enable editing feature */}
+                {/* <button className="btn-edit" title="Edit task" aria-label="Edit task">
+                  ✏️
+                </button> */}
+              </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Stats */}
+      {/* Stats & Progress */}
       {todos.length > 0 && (
-        <div className="todo-stats">
-          <p>✅ Completed: {todos.filter((t) => t.completed).length}/{todos.length}</p>
-          <p>⏳ Remaining: {todos.filter((t) => !t.completed).length}</p>
-        </div>
+        <>
+          <div className="todo-stats">
+            <p>✅ Completed: {todos.filter((t) => t.completed).length}/{todos.length}</p>
+            <p>⏳ Remaining: {todos.filter((t) => !t.completed).length}</p>
+          </div>
+          <div className="progressbar-container">
+            <div className="progressbar" style={{
+              width: todos.length === 0 ? "0%" :
+                ((todos.filter((t) => t.completed).length / todos.length) * 100) + "%"
+            }} />
+          </div>
+        </>
       )}
     </div>
   );
